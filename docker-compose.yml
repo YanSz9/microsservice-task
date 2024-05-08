@@ -1,0 +1,26 @@
+version: '3.1'
+
+services:
+
+  backend-worker:
+    build:
+      context: ./backend-worker/backend-worker/backend-worker
+      dockerfile: Dockerfile
+    container_name: backend-worker
+    ports:
+      - "9090:9090"
+
+  publisher-api:
+    build:
+      context: ./publisher-api/publisher-api/publisher-api
+      dockerfile: Dockerfile
+    container_name: publisher-api
+    ports:
+      - "8080:8080"
+
+  rabbitmq:
+    image: "rabbitmq:3.8.6-management"
+    container_name: rabbitmq-brazil-work
+    ports:
+      - 5672:5672
+      - 15672:15672
