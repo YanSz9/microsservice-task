@@ -3,24 +3,59 @@ version: '3.1'
 services:
 
   backend-worker:
+    hostname: backend-worker
     build:
       context: ./backend-worker/backend-worker/backend-worker
       dockerfile: Dockerfile
+    environment:
+      - SPRING_RABBITMQ_HOST=10.0.0.2
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
     container_name: backend-worker
     ports:
-      - "9090:9090"
+      - "8080:8080"
+    networks:
+      - bubble
+    depends_on:
+      rabbitmq:
+        condition: service_started
 
   publisher-api:
+    hostname: publisher-api
     build:
       context: ./publisher-api/publisher-api/publisher-api
       dockerfile: Dockerfile
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq-brazil-work
     container_name: publisher-api
     ports:
-      - "8080:8080"
+      - "9090:9090"
+    networks:
+      - bubble
+    depends_on:
+      rabbitmq:
+        condition: service_started
 
   rabbitmq:
+    hostname: rabbitmq-brazil-work
+    restart: always
+    environment:
+      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+    networks:
+      - bubble
     image: "rabbitmq:3.8.6-management"
     container_name: rabbitmq-brazil-work
     ports:
       - 5672:5672
       - 15672:15672
+
+networks:
+  bubble:
+    name: bubble
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/16

@@ -17,13 +17,13 @@ public class PaymentRequestConsumer {
     @Autowired
     private PaymentSuccessProducer sucessProducer;
 
-    @RabbitListener(queues = { "payment-request-queue" })
+    @RabbitListener(queues = "payment-request-queue")
     public void receiveMessage(Message<String> message) {
         String messageBody = message.getPayload();
         System.out.println(messageBody);
         if (new Random().nextBoolean()) {
-            sucessProducer.generateResponse("Mensagem de sucesso pagamento" + message);
+            sucessProducer.generateResponse("Pagamento realizado com sucesso, informações do pedido:" + message);
         } else
-            errorProducer.generateResponse("Erro no pagamento" + message);
+            errorProducer.generateResponse("Erro ao processar pagamento, informações do pedido:" + message);
     }
 }
